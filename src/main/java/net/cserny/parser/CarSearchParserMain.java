@@ -8,10 +8,10 @@ import java.util.regex.Pattern;
 
 public class CarSearchParserMain {
 
-    private static final Path LOGS_PATH = Paths.get("/home/leonardo/Documents/logs/");
-    private static final Path OUT_PATH = LOGS_PATH.resolve("out");
-    private static final Path COMBINED_FILE = OUT_PATH.resolve("combined.log");
-    private static final Path CSV_FILE = OUT_PATH.resolve("report.csv");
+    private Path logsPath;
+    private Path outPath;
+    private Path combinedFile;
+    private Path csvFile;
 
     private CarSearchParser parser;
     private CarSearchCsvCreator csvCreator;
@@ -19,11 +19,19 @@ public class CarSearchParserMain {
     private Map<SearchType, List<Pattern>> searchPatterns = new HashMap<>();
     private Pattern logFilePattern = Pattern.compile(".*\\[(?<date>.*)].*(?<method>GET|POST) (?<uri>/.*) HTTP/1\\.1\" (?<status>[0-9]{3}).*");
 
-    public CarSearchParserMain() {
+    public CarSearchParserMain(Path path) {
+        initParams(path);
         initPatterns();
 
-        parser = new CarSearchParser(COMBINED_FILE, LOGS_PATH, logFilePattern, searchPatterns);
-        csvCreator = new CarSearchCsvCreator(COMBINED_FILE, CSV_FILE, logFilePattern, searchPatterns);
+        parser = new CarSearchParser(combinedFile, logsPath, logFilePattern, searchPatterns);
+        csvCreator = new CarSearchCsvCreator(combinedFile, csvFile, logFilePattern, searchPatterns);
+    }
+
+    private void initParams(Path path) {
+        this.logsPath = path;
+        this.outPath = logsPath.resolve("out");
+        this.combinedFile = outPath.resolve("combined.log");
+        this.csvFile = outPath.resolve("report.csv");
     }
 
     private void initPatterns() {
@@ -65,12 +73,14 @@ public class CarSearchParserMain {
     }
 
     public static void main(String[] args) throws IOException {
-        if (args.length != 1) {
-            SystemExiter.exitWithMessage("Please provide command as arg: <PARSE> or <CREATE_CSV>");
+        if (args.length != 2) {
+            SystemExiter.exitWithMessage("Please provide command and logsPath as args: <COMMAND> <PATH>");
         }
 
-        CarSearchParserMain logParser = new CarSearchParserMain();
-        switch (Command.valueOf(args[0].toUpperCase())) {
+        Command command = Command.valueOf(args[0].toUpperCase());
+        Path logsPath = Paths.get(args[1]);
+        CarSearchParserMain logParser = new CarSearchParserMain(logsPath);
+        switch (command) {
             case PARSE:
                 logParser.parse();
                 break;
