@@ -18,7 +18,7 @@ public class CarSearchCsvCreator {
     private Map<SearchType, List<Pattern>> searchPatterns;
 
     private String delimiter = ",";
-    private String encloser = "\"";
+    private String enclosed = "\"";
 
     public CarSearchCsvCreator(Path combinedFile, Path csvFile, Pattern logFilePattern, Map<SearchType, List<Pattern>> searchPatterns) {
         this.combinedFile = combinedFile;
@@ -27,7 +27,7 @@ public class CarSearchCsvCreator {
         this.searchPatterns = searchPatterns;
     }
 
-    public void createCsv() throws IOException {
+    public void create() throws IOException {
         if (!Files.exists(combinedFile)) {
             SystemExiter.exitWithMessage("Combined file doesn't exist, please parse first, aborting");
         }
@@ -58,7 +58,7 @@ public class CarSearchCsvCreator {
     }
 
     private String addCsvField(String field) {
-        return encloser + field + encloser;
+        return enclosed + field + enclosed;
     }
 
     private void writeCsvLine(String line) throws IOException {
@@ -119,16 +119,16 @@ public class CarSearchCsvCreator {
     }
 
     private boolean stopOnCertainParams(Matcher uriMatcher) {
+        boolean stop = false;
         try {
             String carBrand = uriMatcher.group("carBrand");
             String carModel = uriMatcher.group("carModel");
             if (carBrand.isEmpty() || carModel.isEmpty()) {
-                return true;
+                stop = true;
             }
         } catch (IllegalArgumentException | NullPointerException e) {
-            return true;
+            stop = true;
         }
-
-        return false;
+        return stop;
     }
 }

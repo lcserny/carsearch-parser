@@ -88,6 +88,6 @@ public class CarSearchParserMain {
     }
 
     private void createCsv() throws IOException {
-        csvCreator.createCsv();
+        csvCreator.create();
     }
 }
